@@ -2,9 +2,7 @@ package com.qd.entity;
 
 import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
-import java.time.LocalDateTime;
 import java.io.Serializable;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,7 +12,7 @@ import lombok.experimental.Accessors;
 
 /**
  * <p>
- *
+ * 
  * </p>
  *
  * @author lrr
@@ -23,36 +21,31 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@ApiModel(value="Orders对象", description="")
-public class Orders implements Serializable {
+@ApiModel(value="Product对象", description="")
+public class Product implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
-    private Integer deskId;
+    private String pname;
 
-    private Integer propleCount;
+    private String img;
 
-    private String descr;
+    private BigDecimal price;
 
-    private BigDecimal total;
+    private BigDecimal oldPrice;
 
-    @ApiModelProperty(value = "0待支付，1已取消 2已完成")
-    private String states;
+    private String taste;
 
-    private LocalDateTime orderTime;
+    private Integer saleMonth;
 
-    private LocalDateTime payTime;
+    private Integer saleOnOff;
 
-    private LocalDateTime finialTime;
+    private Integer tid;
 
-    private LocalDateTime calTime;
-
-    //额外的属性
-    @TableField(exist = false)
-    private String dname;
+    private Integer weight;
 
 
 }
