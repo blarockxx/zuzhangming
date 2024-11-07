@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title></title>
+		<!-- 导入公共代码 -->
+		<script src="js/common.js"></script>
+		<!-- 引入外部的样式 -->
+		<link rel="stylesheet" href="css/index.css">
+
+	</head>
+	<body>
+		<div id="app">
+			<!-- 口号 -->
+			<el-row :gutter="0">
+				<el-col :xs="24" :sm="24" :md="24">
+					<p class="slogen">家常味道 小米餐厅</p>
+				</el-col>
+			</el-row>
+
+			<!-- 头部 -->
+			<el-row :gutter="0" class="top">
+				<el-col :xs="14" :sm="14" :md="14" class="tit">
+					<p id="shopName"> 小米餐厅（郑州瀚海店）</p>
+					<p><el-icon>
+							<Location />
+						</el-icon>距离1.0km | 河南省郑州市金水区</p>
+				</el-col>
+				<el-col :xs="10" :sm="10" :md="10">
+					<div class="deskName">
+						<el-select v-model="deskId" placeholder="选桌号" style="width: 100px" @change="getCartInfo()">
+							<el-option v-for="item in deskList" :key="item.value" :label="item.dname"
+								:value="item.id" />
+						</el-select>
+					</div>
+				</el-col>
+			</el-row>
+
+
+			<!-- 中间 -->
+			<el-row :gutter="0" class="middle">
+				<!-- 左侧：分类列表 -->
+				<el-col :xs="6" :sm="6" :md="6" class="types">
+					<ul class="type">
+						<li v-for="(item,index) in typeList">
+							<a href="#">{{item.tname}}</a>
+						</li>
+					</ul>
+				</el-col>
+				<!-- 右侧：菜品列表 -->
+				<el-col :xs="18" :sm="18" :md="18">
+					<div class="pros">
+						<!-- 单个菜品 -->
+						<el-row :gutter="10" class="proItem" v-for="(item,index) in proList">
+							<el-col :xs="8" :sm="8" :md="8">
+								<img :src="serverPre+'/showPic/'+item.img" alt="">
+							</el-col>
+							<el-col :xs="16" :sm="16" :md="16">
+								<h4>{{item.pname}}</h4>
+								<p class="taste"> {{item.taste}} </p>
+								<p class="proBottom">
+									<span class="priceRed">￥<span class="price">{{item.price}}</span></span>
+									<span class="oldPrice">{{item.oldPrice}}</span>
+									<span class="jiahao" @click="addCart(item.id,1)">+</span>
+								</p>
+							</el-col>
+						</el-row>
+						<!-- 菜品结束 -->
+					</div>
+				</el-col>
+			</el-row>
+			<!-- 中间结束 -->
+
+
+			<!-- 购物车 -->
+			<el-row :gutter="0" class="cart" @click="showDialog()">
+				<el-col :xs="24" :sm="24" :md="24">
+					<el-icon>
+						<Memo />
+					</el-icon>
+					<span id="totalNum">{{totalNum}}</span>
+					￥<span id="totalPrice">{{totalPrice}}</span>
+					<span id="oldTotalPrice">￥{{oldTotalPrice}}</span>
+					<span class="toOrder">去买单</span>
+				</el-col>
+			</el-row>
+
+
+			<!-- 底部菜单-->
+			<el-row :gutter="0" class="bottom">
+				<el-col :xs="12" :sm="12" :md="12" style="background: #ccc;">
+					<div class="grid-content">
+						<el-icon>
+							<Fries />
+						</el-icon>点餐
+					</div>
+				</el-col>
+				<el-col :xs="12" :sm="12" :md="12" @click="toOrderPage()">
+					<div class="grid-content">
+						<el-icon>
+							<List />
+						</el-icon>
+						订单
+					</div>
+				</el-col>
+			</el-row>
+
+
+			<!-- 对话框的弹窗 -->
+			<el-dialog v-model="dialogVisible" :title="'共'+totalNum+'件商品'" width="100%" :before-close="handleClose">
+				<!-- 单个菜品 -->
+				<el-row :gutter="10" class="proItem" v-for="(item,index) in cartList">
+					<el-col :xs="6" :sm="6" :md="6">
+						<img :src="serverPre+'/showPic/'+item.img" alt="">
+					</el-col>
+					<el-col :xs="18" :sm="18" :md="18">
+						<h4>{{item.pname}}</h4>
+						<p class="taste"> {{item.taste}} </p>
+						<p class="proBottom">
+							<span class="priceRed">￥<span class="price">{{item.price}}</span></span>
+							<span class="oldPrice">{{item.oldPrice}}</span>
+							<span class="jian" @click="addCart(item.pid,-1)">-</span>
+							<span class="proNum"> {{item.num}} </span>
+							<span class="jiahao" @click="addCart(item.pid,1)">+</span>
+						</p>
+					</el-col>
+				</el-row> <!-- 菜品结束 -->
+				</el-row:gutter ="25">
+				<el-col :xs="10" :sm="10" :md="10">
+					<el-input-number v-model="propleCount" :min="1" :max="10" placeholder="人数" />
+				</el-col>
+				<el-col :xs="14" :sm="14" :md="14">
+					<el-input v-model="descr" placeholder="请输入您的需要" />
+				</el-col>
+				</el-row>
+				<template #footer>
+					<div class="dialog-footer">
+						<el-button @click="clearCart()">清空购物车</el-button>
+						<el-button type="primary" @click="toOrder()">
+							去结算
+						</el-button>
+					</div>
+				</template>
+			</el-dialog>
+
+
+		</div>
+		<script>
+			const App = {
+				data() {
+					return {
+						proList: [],
+						typeList: [],
+						totalNum: 0,
+						totalPrice: 0.00,
+						oldTotalPrice: 0.00,
+						serverPre: globalData.server,
+						deskList: [],
+						deskId: "选桌号",
+						cartList: [],
+						dialogVisible: false,
+						descr:'',
+						propleCount:1,
+					}
+				},
+				created() {
+					this.getAllPro();
+					this.getAllType();
+					this.getAllDesk();
+				},
+				methods: {
+					async getAllType() {
+						const res = await getAllTypeApi();
+						this.typeList.push(...res.data)
+					},toOrderPage(){
+					window.location.href="orders.html"
+				},
+				async toOrder(){
+						let  params={
+							"descr":this.descr,
+							"deskId":this.deskId,
+							"propleCount":this.propleCount,
+							"total":this.totalPrice
+						}
+						const res = await toOrderApi(params);
+						console.log(res);
+					if(res.code==200){
+							this.getCartInfo();
+							this.dialogVisible = false;
+						}
+			},
+					async clearCart() {
+						let params = {
+							'deskId':this.deskId
+						}
+						const res = await clearCartApi(params);
+						// console.log(res)
+						if(res.code==200){
+							//获取最新的购物车清单
+							this.getCartInfo();
+						}
+					},
+					showDialog() {
+						if (this.totalNum == 0) {
+							ElementPlus.ElMessage({ //提示警告
+								message: '请先选购',
+								type: 'warning',
+								offset: 200
+							})
+						} else {
+							this.dialogVisible = true;
+						}
+					},
+					async getCartInfo() {
+						// alert(this.deskId);
+						globalData.setDeskId(this.deskId)
+						let params = {
+							'deskId': this.deskId
+						}
+						const res = await getCartListApi(params);
+						console.log(res)
+						this.cartList = res.data;
+						this.totalNum = 0;
+						this.totalPrice = 0;
+						this.oldTotalPrice = 0;
+						for (let cart of this.cartList) {
+							this.totalNum += cart.num;
+							this.totalPrice += cart.price * cart.num;
+							this.oldTotalPrice += cart.oldPrice * cart.num;
+						}
+						this.totalPrice = this.totalPrice.toFixed(2);
+						this.oldTotalPrice = this.oldTotalPrice.toFixed(2);
+					},
+					async getAllPro() {
+						const res = await getAllProApi();
+						this.proList.push(...res.data)
+					},
+					async getAllDesk() {
+						const res = await getAllDeskApi();
+						this.deskList.push(...res.data)
+					},
+					async addCart(id, num) {
+						//1.先选桌：判断桌id是否存在，且是数字类型，否则就警告且结束函数
+						if (typeof(this.deskId) != 'number') {
+							ElementPlus.ElMessage({ //提示警告
+								message: '请先选桌号',
+								type: 'warning',
+								offset: 200
+							})
+							return; //结束函数
+						}
+						//2.向服务端发请求：添加到购物车表
+						let param = { //准备参数
+							'deskId': this.deskId,
+							'productId': id,
+							'num': num
+						}
+						const res = await addCartApi(param); //发请求
+						if (res.code == 200) { //处理结果
+							//获取最新的购物车清单
+							this.getCartInfo();
+							//提示成功
+							ElementPlus.ElMessage({
+								message: '成功',
+								type: 'success',
+								offset: 200
+							})
+						}
+					}
+				} //自定义方法结束
+			};
+
+
+
+			const app = Vue.createApp(App);
+
+			//使用图标
+			app.component('Fries', ElementPlusIconsVue.Fries)
+			app.component('List', ElementPlusIconsVue.List)
+			app.component('Location', ElementPlusIconsVue.Location)
+			app.component('Memo', ElementPlusIconsVue.Memo)
+			//引入ElementPlus
+			app.use(ElementPlus);
+			app.mount("#app");
+		</script>
+	</body>
+</html>
