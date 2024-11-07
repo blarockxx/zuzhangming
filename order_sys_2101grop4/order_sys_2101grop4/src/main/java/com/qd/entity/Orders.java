@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.time.LocalDateTime;
 import java.io.Serializable;
+import java.util.List;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -14,7 +16,7 @@ import lombok.experimental.Accessors;
 
 /**
  * <p>
- *
+ * 
  * </p>
  *
  * @author lrr
@@ -53,6 +55,8 @@ public class Orders implements Serializable {
     //额外的属性
     @TableField(exist = false)
     private String dname;
+    @TableField(exist = false)
+    private List<OrderDetail> orderDetailList;
 
 
 }

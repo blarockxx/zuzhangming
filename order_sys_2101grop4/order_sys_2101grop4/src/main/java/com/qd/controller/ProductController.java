@@ -49,7 +49,7 @@ public class ProductController {
         if(EmptyUtils.isNotEmpty(product.getTid())) {
             queryWrapper.eq("tid", product.getTid());
         }
-        queryWrapper.orderByDesc("id");
+        queryWrapper.orderByDesc("weight");
 
 
         //调用服务层的方法进行分页查询、条件查询
@@ -62,6 +62,18 @@ public class ProductController {
         return ResultUtils.returnSuccessLayui(list,total);
     }
 
+
+    /**
+     *  前台首页获取上架商品，且按照权重排序
+     * @return
+     */
+    @GetMapping("/getAllList")
+    public Object getList(){
+        QueryWrapper queryWrapper = new QueryWrapper();
+        queryWrapper.eq("sale_on_off",1);
+        queryWrapper.orderByDesc("weight");
+        return ResultUtils.returnDataSuccess(service.list(queryWrapper));
+    }
 
     /**
      * 删除

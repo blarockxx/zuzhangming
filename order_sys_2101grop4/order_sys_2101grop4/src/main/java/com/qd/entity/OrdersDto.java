@@ -3,7 +3,7 @@ package com.qd.entity;
 import lombok.Data;
 
 @Data
-public class OrdersDto extends Orders {
+public class OrdersDto extends  Orders{
     private String timeMin;
     private String timeMax;
     private Integer page;  //第几页

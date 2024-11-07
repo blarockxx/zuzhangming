@@ -3,6 +3,8 @@ package com.qd.service;
 import com.qd.entity.Cart;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * <p>
  *  服务类
@@ -13,4 +15,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ICartService extends IService<Cart> {
 
+    List<Cart> getList(Integer deskId);
 }

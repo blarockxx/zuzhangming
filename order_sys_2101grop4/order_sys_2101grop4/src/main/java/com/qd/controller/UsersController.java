@@ -1,7 +1,9 @@
 package com.qd.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.qd.common.result.ResultUtils;
+import com.qd.common.utils.EmptyUtils;
 import com.qd.entity.Users;
 import com.qd.service.IUsersService;
 import io.swagger.annotations.Api;
@@ -11,6 +13,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
+import javax.websocket.Session;
 import java.util.List;
 
 /**
@@ -90,5 +94,35 @@ public class UsersController {
         }
         return ResultUtils.returnFail("删除失败");
     }
+
+
+    @PostMapping("/login")
+    public Object login(@RequestParam String uname, @RequestParam String password, HttpSession session){
+        QueryWrapper queryWrapper = new QueryWrapper();
+        queryWrapper.eq("uname",uname);
+        queryWrapper.eq("password",password);
+        Users one = service.getOne(queryWrapper);
+        if(EmptyUtils.isNotEmpty(one)){
+            //登录成功后将用户名存储在会话中
+            session.setAttribute("userName",uname);
+            return ResultUtils.returnDataSuccess(one);
+        }else{
+            return ResultUtils.returnFail("用户名或密码错误");
+        }
+    }
+
+
+    @GetMapping("/getCurrUser")
+    public Object getCurrUser(HttpSession session){
+        Object userName = session.getAttribute("userName");
+        return ResultUtils.returnDataSuccess(userName);
+    }
+
+    @GetMapping("/signOut")
+    public Object signOut(HttpSession session){
+        session.removeAttribute("userName");
+        return ResultUtils.returnSuccess();
+    }
+
 
 }
